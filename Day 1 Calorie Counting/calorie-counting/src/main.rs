@@ -1,24 +1,24 @@
-use std::{fs, num};
+use std::fs;
 
 fn main() {
     let mut number_vec: Vec<u32> = Vec::new();
     let contents = fs::read_to_string("./src/input.txt")
         .expect("Should have been able to read the file");
 
-    for line in contents.split("\r\n\r\n") {
-        let mut sum = 0;
+    contents.split("\n\n").for_each(|line| {
+        number_vec.push(line.split("\n").fold(0, |acc, elem| acc + elem.parse::<u32>().unwrap_or(0)));
+    });
 
-        line.split("\r\n").for_each(|string_number| {
-            sum += string_number.parse::<u32>().unwrap();
-        });
+    number_vec.sort_by(|a, b| b.partial_cmp(a).unwrap());
 
-        number_vec.push(sum);
-    }
-
-    let max = match number_vec.iter().max() {
-        Some(max) => max,
-        None => panic!("Vector is empty"),
+    let (&first, &second, &third) = {
+        (number_vec.get(0).unwrap_or(&0),
+        number_vec.get(1).unwrap_or(&0),
+        number_vec.get(2).unwrap_or(&0),)
     };
 
-    println!("max: {}", max);
+    println!("First: {}", first);
+    println!("Second: {}", second);
+    println!("Third: {}", third);
+    println!("Sum: {}", first + second + third);
 }
