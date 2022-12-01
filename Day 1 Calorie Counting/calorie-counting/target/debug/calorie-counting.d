@@ -1,0 +1,1 @@
+C:\Users\aleja\OneDrive\ -\ ECAM\1Ma\ -\ Informatique\GPU\ computing\Algorithms\SA4T-AdventOfCode\Day\ 1\ Calorie\ Counting\calorie-counting\target\debug\calorie-counting.exe: C:\Users\aleja\OneDrive\ -\ ECAM\1Ma\ -\ Informatique\GPU\ computing\Algorithms\SA4T-AdventOfCode\Day\ 1\ Calorie\ Counting\calorie-counting\src\main.rs
