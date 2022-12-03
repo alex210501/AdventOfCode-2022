@@ -15,8 +15,6 @@ fn get_priority(c: char) -> u16 {
 }
 
 fn main() {
-    let test = vec![1, 2, 3, 4, 5, 6];
-    println!("{:?}", &test[3..3+3]);
     let mut sum: u32 = 0;
     let contents = fs::read_to_string("./src/input.txt")
         .expect("Should have been able to read the file");
