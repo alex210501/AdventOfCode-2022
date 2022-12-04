@@ -1,5 +1,4 @@
-use std::io::{BufReader, BufRead};
-use std::fs::File;
+use std::fs;
 
 #[derive(Debug)]
 struct Assignment {
@@ -30,18 +29,13 @@ impl Assignment {
 }
 
 fn main() {
-    let file_path = "./src/input.txt";
+    let contents = fs::read_to_string("./src/input.txt")
+        .expect("Should have been able to read the file");
 
     /* Part One */
-    let reader = BufReader::new(File::open(file_path).expect(&format!("Cannot open {}", file_path)));
     let mut fully_overlap: u16 = 0;
 
-    reader.lines().for_each(|line_result| {
-        let line = match line_result {
-            Ok(line) => line,
-            Err(_) => return,
-        };
-
+    contents.lines().for_each(|line| {
         let current_pair: Vec<Assignment> = line.split(',')
                                                 .map(|elem| Assignment::from_string(elem))
                                                 .collect();
@@ -53,16 +47,12 @@ fn main() {
     });
 
     /* Part two */
-    let reader = BufReader::new(File::open(file_path).expect(&format!("Cannot open {}", file_path)));
     let mut overlap: u16 = 0;
 
-    reader.lines().for_each(|line_result| {
-        let current_pair: Vec<Assignment> = match line_result {
-            Ok(line) => line.split(',')
+    contents.lines().for_each(|line| {
+        let current_pair: Vec<Assignment> = line.split(',')
                             .map(|elem| Assignment::from_string(elem))
-                            .collect(),
-            Err(_) => return,
-        };
+                            .collect();
 
         if current_pair[0].is_overlaped(&current_pair[1]) || current_pair[1].is_overlaped(&current_pair[0]) {
             overlap += 1;
