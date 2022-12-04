@@ -20,7 +20,7 @@ fn main() {
         .expect("Should have been able to read the file");
 
     /* Part one */
-    contents.split('\n').for_each(|rucksack| {
+    contents.lines().for_each(|rucksack| {
         let mid = rucksack.len() / 2;
         let mut char_map: HashMap<char, usize> = HashMap::new();
         

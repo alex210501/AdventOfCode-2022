@@ -1,4 +1,4 @@
-use std::{fs, iter::Enumerate};
+use std::fs;
 use regex::Regex;
 
 fn win_against(value: &str) -> &str {
@@ -74,11 +74,11 @@ fn main() {
     // Regex just for fun
     let re = Regex::new(r"([A-Z]) ([A-Z])").unwrap();
     let mut total_score = 0;
-    let mut total_score_part_2 = 0;
     let contents = fs::read_to_string("./src/input.txt")
         .expect("Should have been able to read the file");
 
-    contents.split("\n").for_each(|line| {
+    /* Part One */
+    contents.lines().for_each(|line| {
         for elem in re.captures_iter(line) {
             let enemy = &elem[1];
             let player = &elem[2];
@@ -87,7 +87,10 @@ fn main() {
         }
     });
 
-    contents.split("\n").for_each(|line| {
+    /* Part Two */
+    let mut total_score_part_2 = 0;
+
+    contents.lines().for_each(|line| {
         for elem in re.captures_iter(line) {
             let enemy = &elem[1];
             let expected_result = &elem[2];
