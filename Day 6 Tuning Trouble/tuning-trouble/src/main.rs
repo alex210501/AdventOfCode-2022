@@ -1,13 +1,14 @@
 use std::{fs, collections::HashMap};
 
-const STEP: usize = 4;
+const STEP_START: usize = 4;
+const STEP_MESSAGE: usize = 14;
 
-fn get_marker(text: &str) -> i32 {
+fn get_marker(step: usize, text: &str) -> i32 {
     let mut lower: usize = 0;
 
     // Iterate over each character
     for (i, _) in text.char_indices() {
-        if (i - lower) < STEP {
+        if (i - lower) < step {
             continue;
         }
 
@@ -37,5 +38,6 @@ fn main() {
     let contents = fs::read_to_string("./src/input.txt")
         .expect("Should have been able to read the file");
     
-    println!("Marker Part One: {}", get_marker(&contents));
+    println!("Marker Part One: {}", get_marker(STEP_START, &contents));
+    println!("Marker Part Two: {}", get_marker(STEP_MESSAGE, &contents));
 }
