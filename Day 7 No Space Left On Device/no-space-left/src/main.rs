@@ -95,6 +95,27 @@ impl FileSystem {
         dbg!("{:?}", &instance.stacks);        
         dbg!("{:?}", &instance.sum);
         instance.get_sum_less_than();
+
+        while !instance.stacks.is_empty() {
+            let value = instance.stacks.pop().unwrap();
+            instance.sum.push(value);
+
+            if !instance.stacks.is_empty() {
+                let base = instance.stacks.pop().unwrap();
+                instance.stacks.push(base + value);
+            }
+        }
+
+        let test: u32 = *instance.sum.iter().max().unwrap();
+        let space_need:i32 = test as i32 - 40000000;
+        println!("need: {}", space_need);
+        let mut test2 = 40000000;
+        for value in instance.sum {
+            if value > space_need as u32 && value < test2 {
+                test2 = value;
+            }
+        }
+        println!("test 2: {}", test2);
     }
 }
 fn main() {
