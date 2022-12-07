@@ -1,8 +1,7 @@
-use std::{
-    collections::HashMap,
-    fs,
-};
-use std::rc::Rc;
+use std::fs;
+
+const MAX_VALUE: u32 = 100000;
+const CAPACITY_NEEDED: u32 = 40000000;
 
 struct FileSystem {
     stacks: Vec<u32>,
@@ -34,10 +33,7 @@ impl FileSystem {
     }
 
     fn list(&mut self, result: &str) {
-        println!("1value: {:?}", self.stacks);
-
         let base =  self.stacks.pop().unwrap();
-        println!("2value: {:?}", self.stacks);
         let value = result.lines().enumerate().fold(0, |acc, (i, line)| {
             if i == 0 {
                 return acc;
@@ -50,28 +46,37 @@ impl FileSystem {
             };
 
             if prefix != "dir" {
-                println!("{:?}", prefix.parse::<u32>().unwrap());
-
                 return prefix.parse::<u32>().unwrap() + acc;
             }
 
             acc
         });
-        println!("value: {}", value);
+        
         self.stacks.push(value + base);
-        // self.sum.push(value + base);
     }
 
-    fn get_sum_less_than(&self) -> u32 {
-        let mut sum_value = 0;
-        for &value in self.sum.iter() {
-            if value <= 100000 {
-                sum_value += value;
+    fn get_sum_less_than(&self, max_value: u32) -> u32 {
+        self.sum.iter().fold(0, |acc, &value| {
+            if value <= max_value {
+                return value + acc;
             }
-        }
 
-        dbg!("{}", sum_value);
-        sum_value
+            acc
+        })
+    }
+
+    fn get_folder_capacity_remove(&self, max_capacity: u32) -> u32 {
+        // The max value is the size of the entire folder
+        let &folder_size = self.sum.iter().max().unwrap();
+        let space_needed = folder_size - max_capacity;
+
+        self.sum.iter().fold(u32::MAX, |acc, &value| {
+            if value > space_needed && value < acc {
+                return value;
+            }
+
+            acc
+        })
     }
 
     fn create_from_commands(commands: &str) {
@@ -81,21 +86,14 @@ impl FileSystem {
         commands.split("$").for_each(|command| {
             let command = command.trim();
 
-            println!("single_words: {:?}", command);
             if command.starts_with("cd") { 
                 instance.change_directory(command);
             } else if command.starts_with("ls") {
                 instance.list(command);
             }
-
-            dbg!("{}", &instance.stacks);        
-            dbg!("{}", &instance.sum);
         });
 
-        dbg!("{:?}", &instance.stacks);        
-        dbg!("{:?}", &instance.sum);
-        instance.get_sum_less_than();
-
+        // Empty the stack
         while !instance.stacks.is_empty() {
             let value = instance.stacks.pop().unwrap();
             instance.sum.push(value);
@@ -106,16 +104,8 @@ impl FileSystem {
             }
         }
 
-        let test: u32 = *instance.sum.iter().max().unwrap();
-        let space_need:i32 = test as i32 - 40000000;
-        println!("need: {}", space_need);
-        let mut test2 = 40000000;
-        for value in instance.sum {
-            if value > space_need as u32 && value < test2 {
-                test2 = value;
-            }
-        }
-        println!("test 2: {}", test2);
+        println!("Part one: {}", instance.get_sum_less_than(MAX_VALUE));
+        println!("Part two: {}", instance.get_folder_capacity_remove(CAPACITY_NEEDED));
     }
 }
 fn main() {
