@@ -5,7 +5,6 @@ fn main() {
         fs::read_to_string("./src/input.txt").expect("Should have been able to read the file");
 
     let mut tree_visited: HashSet<[u32; 2]> = HashSet::new();
-    let mut visible_trees: u32 = 0;
     let mut numbers: Vec<Vec<u32>> = Vec::new();
 
     // Parse line
@@ -31,7 +30,6 @@ fn main() {
                 .get(i_col as usize)
                 .unwrap();
 
-            //     // Top to bottom
             for index in 0..cols {
                 let current_val = *numbers
                     .get(i_row as usize)
@@ -131,10 +129,7 @@ fn main() {
             }
         }
 
-        // println!("before {}-{}: {}", *r, *c, scenic_score);
-
-
-        for index in (*c + 1..cols) {
+        for index in *c + 1..cols {
             let current_val = *numbers
                 .get(*r as usize)
                 .unwrap()
@@ -170,7 +165,7 @@ fn main() {
             }
         }
 
-        for index in (*r + 1..rows) {
+        for index in *r + 1..rows {
             let current_val = *numbers
                 .get(index as usize)
                 .unwrap()
@@ -188,14 +183,11 @@ fn main() {
             }
         }
 
-        // println!("{}-{}: {}", *r, *c, scenic_score);
         if scenic_score > highet_scenic_score {
             highet_scenic_score = scenic_score;
         }
     }
 
-    println!("{:?}", numbers);
-    println!("{}", tree_visited.len());
-    println!("{}", highet_scenic_score);
-    // println!("{:?}", tree_visited);
+    println!("Part One: {}", tree_visited.len());
+    println!("Part Two: {}", highet_scenic_score);
 }
