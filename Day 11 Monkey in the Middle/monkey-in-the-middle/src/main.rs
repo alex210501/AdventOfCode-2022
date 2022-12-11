@@ -1,30 +1,31 @@
 use regex::Regex;
 use std::fs;
 
-const ROUNDS: u32 = 20;
+const SUPERMODULO: i64 = 9699690;
+const ROUNDS: u32 = 10000;
 
 #[derive(Debug)]
 struct Monkey {
-    items: Vec<i32>,
+    items: Vec<i64>,
     operation: [String; 3],
-    test_division: i32,
+    test_division: i64,
     test_valid: usize,
     test_invalid: usize,
     items_inspected: u32,
 }
 
 impl Monkey {
-    fn get_operation(&self, item: i32) -> i32 {
+    fn get_operation(&self, item: i64) -> i64 {
         let operator = self.operation[1].as_str();
         let value_1 = if self.operation[0] == "old" {
             item
         } else {
-            self.operation[1].parse::<i32>().unwrap()
+            self.operation[1].parse::<i64>().unwrap()
         };
         let value_2 = if self.operation[2] == "old" {
             item
         } else {
-            self.operation[2].parse::<i32>().unwrap()
+            self.operation[2].parse::<i64>().unwrap()
         };
 
         let value = match operator {
@@ -35,7 +36,7 @@ impl Monkey {
             _ => 0,
         };
 
-        value / 3
+        value % SUPERMODULO
     }
 }
 
@@ -43,12 +44,12 @@ fn get_double_point_position(text: &str) -> usize {
     text.chars().position(|c| c == ':').unwrap()
 }
 
-fn extract_items(text: &str) -> Vec<i32> {
+fn extract_items(text: &str) -> Vec<i64> {
     let double_point = get_double_point_position(text);
 
     text[double_point + 1..]
         .split(",")
-        .map(|value| value.trim().parse::<i32>().unwrap())
+        .map(|value| value.trim().parse::<i64>().unwrap())
         .collect()
 }
 
@@ -64,11 +65,11 @@ fn extract_operation(text: &str) -> [String; 3] {
         .unwrap()
 }
 
-fn extract_test(text: &str) -> i32 {
+fn extract_test(text: &str) -> i64 {
     let re_test_division = Regex::new(r"Test: divisible by ([0-9]+)").unwrap();
 
     for cap in re_test_division.captures_iter(text) {
-        return cap[1].parse::<i32>().unwrap();
+        return cap[1].parse::<i64>().unwrap();
     }
 
     -1
@@ -102,9 +103,9 @@ fn main() {
 
     // Parse the monkeys
     contents.split("Monkey").for_each(|monkey_info| {
-        let mut items: Vec<i32> = Vec::new();
+        let mut items: Vec<i64> = Vec::new();
         let mut operation: [String; 3] = Default::default();
-        let mut test_division: i32 = 0;
+        let mut test_division: i64 = 0;
         let mut test_valid: usize = 0;
         let mut test_invalid: usize = 0;
 
@@ -137,7 +138,6 @@ fn main() {
 
     // Compute each monkey
     for _ in 0..ROUNDS {
-        println!("i");
 
         let mut monkey_number = 0;
 
@@ -150,16 +150,12 @@ fn main() {
                 let operation = monkeys[monkey_number].get_operation(item);
 
                 monkeys[monkey_number].items_inspected += 1;
-                println!("item: {}, op: {}", item, operation);
 
                 if operation % monkeys[monkey_number].test_division == 0 {
                     let test_valid_monkey = monkeys[monkey_number].test_valid;
-                    println!("test valid monkey: {}", test_valid_monkey);
                     monkeys[test_valid_monkey].items.push(operation);
                 } else {
                     let test_invalid_monkey = monkeys[monkey_number].test_invalid;
-                    println!("test invalid monkey: {}", test_invalid_monkey);
-
                     monkeys[test_invalid_monkey].items.push(operation);
                 }
 
@@ -173,9 +169,9 @@ fn main() {
 
     let sum_two_most_active_monkeys = {
         monkeys.sort_by(|monkey_1, monkey_2| monkey_2.items_inspected.cmp(&monkey_1.items_inspected));
-        monkeys.get(0).unwrap().items_inspected * monkeys.get(1).unwrap().items_inspected
+        monkeys.get(0).unwrap().items_inspected as u64 * monkeys.get(1).unwrap().items_inspected as u64
     };
 
-    dbg!("{:?}", monkeys);
+    // dbg!("{:?}", monkeys);
     println!("Sum two most active monkeys: {}", sum_two_most_active_monkeys);
 }
