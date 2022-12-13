@@ -43,8 +43,6 @@ fn compute_number(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
     let number_1 = pair_1.as_u32().unwrap();
     let number_2 = pair_2.as_u32().unwrap();
 
-    println!("Compute number: {}-{}", number_1, number_2);
-
     if number_1 < number_2 {
         return Results::CORRECT;
     } else if number_1 > number_2 {
@@ -55,8 +53,6 @@ fn compute_number(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
 }
 
 fn compute_array(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
-    println!("Compute array: {}-{}", pair_1, pair_2);
-
     let loops = if pair_1.len() < pair_2.len() {pair_2.len()} else {pair_1.len()};
 
     for i in 0..loops {
@@ -109,6 +105,7 @@ fn main() {
         pairs.push([pair[0].clone(), pair[1].clone()]);
     });
 
+    /* Part One */
     for (i, [pair_1, pair_2]) in pairs.iter().enumerate() {
         let result = compute_pair(pair_1, pair_2);
         match result {
@@ -117,10 +114,30 @@ fn main() {
             }
             _ => {}
         };
-
-        println!("Compute: {:?}", result);
     }
 
+    /* Part two */
+    let first_divider = "[[2]]";
+    let second_divider = "[[6]]";
+    let mut line_vec: Vec<JsonValue> = vec![json::parse(first_divider).unwrap(), json::parse(second_divider).unwrap()];
+    pairs.iter().for_each(|x| line_vec.extend_from_slice(x));
+
+    for i in 0..line_vec.len() {
+        for j in i..line_vec.len() {
+            let val_1 = &line_vec[i];
+            let val_2 = &line_vec[j];
+            match compute_pair(&val_1, &val_2) {
+                Results::CORRECT => {},
+                _ => {line_vec.swap(i, j)},
+            };
+        }
+    }
+
+    let first_divider_position = line_vec.iter().position(|x| x.to_string() == first_divider).unwrap() + 1;
+    let seconds_divider_position = line_vec.iter().position(|x| x.to_string() == second_divider).unwrap() + 1;
+
     println!("Good order score: {}", good_order_score);
-    // dbg!("{}", pairs);
+    println!("First divider: {}", first_divider_position);
+    println!("Second divider: {}", seconds_divider_position);
+    println!("Part two: {}", first_divider_position*seconds_divider_position);
 }
