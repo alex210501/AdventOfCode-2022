@@ -44,29 +44,27 @@ fn get_neightboors(grid: &Vec<Vec<char>>, node: Node) -> Vec<Node> {
     let mut neighboors: Vec<Node> = Vec::new();
 
     if x > 0 {
-        neighboors.push(Node {coords: (y, x - 1), steps: node.steps + 1});
+        neighboors.push(Node {coords: (y, x - 1), steps: if grid[y][x - 1] == 'a' {0} else {node.steps + 1}});
     }
 
     if y > 0 {
-        neighboors.push(Node {coords: (y - 1, x), steps: node.steps + 1});
+        neighboors.push(Node {coords: (y - 1, x), steps: if grid[y - 1][x] == 'a' {0} else {node.steps + 1}});
     }
 
     if x < cols - 1 {
-        neighboors.push(Node {coords: (y, x + 1), steps: node.steps + 1});
+        neighboors.push(Node {coords: (y, x + 1), steps: if grid[y][x + 1] == 'a' {0} else {node.steps + 1}});
     }
 
     if y < rows - 1 {
-        neighboors.push(Node {coords: (y + 1, x), steps: node.steps + 1});
+        neighboors.push(Node {coords: (y + 1, x), steps: if grid[y + 1][x] == 'a' {0} else {node.steps + 1}});
     }
 
     neighboors
 }
 
 fn step_to_end(grid: &Vec<Vec<char>>, start: (usize, usize), end: (usize, usize)) -> u32 {
-    let mut iterations: u32 = 0;
     let mut visited_nodes: HashSet<(usize, usize)> = HashSet::new();
     let mut neightboors: Queue<Node> = Queue::new();
-    let mut nodes: HashSet<(usize, usize)> = HashSet::new();
 
     let _ = neightboors.add(Node { coords: start, steps: 0 });
 
@@ -74,28 +72,20 @@ fn step_to_end(grid: &Vec<Vec<char>>, start: (usize, usize), end: (usize, usize)
         let node = neightboors.remove().unwrap();
 
         if node.coords == end {
-            println!("nope");
             return node.steps;
         }
 
         get_neightboors(&grid, node).iter().filter(|v| {
-            grid[v.coords.0][v.coords.1] as u8 <= grid[node.coords.0][node.coords.1] as u8 ||
-            grid[v.coords.0][v.coords.1] as u8 == grid[node.coords.0][node.coords.1] as u8 + 1
+            grid[v.coords.0][v.coords.1] as u8 <=  grid[node.coords.0][node.coords.1] as u8 + 1
         }).for_each(|v| {
             if !visited_nodes.contains(&v.coords) {
                 visited_nodes.insert(v.coords);
                 let _ = neightboors.add(v.clone());
             } 
         });
-        
-        // if last_len == visited_nodes.len() {
-            // println!("node {:?}", neightboors.iter().map(|(y, x)| grid[*y][*x]).collect::<Vec<char>>());
-        //     return 0;
-        // }
     }
 
     0
-    // return helper(&grid, end, set.clone(), &mut HashSet::new(), 0);
 }
 
 fn main() {
