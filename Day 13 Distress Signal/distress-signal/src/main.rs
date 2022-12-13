@@ -1,79 +1,103 @@
 use std::fs;
 
-use json::{array, JsonValue};
+use json::JsonValue;
 extern crate json;
 // use json;
 
-fn compute_number(pair_1: &JsonValue, pair_2: &JsonValue) -> bool {
-    // println!("compute number: {} - {}", pair_1, pair_2);
-    // println!("compute number: {} - {}", pair_1.is_number(), pair_2.is_number());
+#[derive(Debug, PartialEq, Eq)]
+enum Results {
+    CORRECT,
+    WRONG,
+    CONTINUE,
+}
+
+fn compute_mix(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
+    if pair_2.is_null() && !pair_1.is_null() {
+        return Results::WRONG;
+    }
+
+    if pair_1.is_null() && pair_2.is_null() {
+        return Results::CONTINUE;
+    }
+
+    if pair_1.is_null() {
+        return Results::CORRECT;
+    }
+
+    if pair_1.is_array() && pair_2.is_number() {
+        let mut array = JsonValue::new_array();
+        let _ = array.push(pair_2.as_u32().unwrap());
+
+        return compute_array(pair_1, &array);
+    } else if pair_1.is_number() && pair_2.is_array(){
+        let mut array = JsonValue::new_array();
+        let _ = array.push(pair_1.as_u32().unwrap());
+
+        return compute_array(&array, pair_2);
+    } else {
+        return Results::CONTINUE;
+    }
+}
+
+fn compute_number(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
     let number_1 = pair_1.as_u32().unwrap();
     let number_2 = pair_2.as_u32().unwrap();
 
-    number_1 <= number_2
+    println!("Compute number: {}-{}", number_1, number_2);
+
+    if number_1 < number_2 {
+        return Results::CORRECT;
+    } else if number_1 > number_2 {
+        return Results::WRONG;
+    } else {
+        return Results::CONTINUE;
+    }
 }
 
-fn compute_pair(pair_1: &JsonValue, pair_2: &JsonValue) -> bool {
-    println!("1: {}\n2: {}", pair_1, pair_2);
+fn compute_array(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
+    println!("Compute array: {}-{}", pair_1, pair_2);
 
-    if pair_1.is_number() && pair_1.is_number() {
-        return compute_number(&pair_1, &pair_1);
-    }
+    let loops = if pair_1.len() < pair_2.len() {pair_2.len()} else {pair_1.len()};
 
-    for i in 0..pair_1.len() {
-        let value_1 = pair_1[i].clone();
-        let value_2 = pair_2[i].clone();
+    for i in 0..loops {
+        let value_1 = &pair_1[i];
+        let value_2 = &pair_2[i];
 
-        if value_1.is_number() && value_2.is_number() {
-            if !compute_number(&value_1, &value_2) {
-                return false;
-            }
-        } else if value_1.is_number() && value_2.is_array() {
-            if value_2.len() == 0 {
-                return false;
-            }
+        if value_1.is_null() && value_2.is_null() {
+            return Results::CONTINUE;
+        }
 
-            let mut json_array = JsonValue::new_array();
-            let _ = json_array.push(value_1.as_u32().unwrap());
+        if value_1.is_null() {
+            return Results::CORRECT;
+        }
 
-            if !compute_pair(&json_array, &value_2) {
-                return false;
-            }
-        } else if value_1.is_array() && value_2.is_number() {
-            if value_1.len() == 0 {
-                return false;
-            }
+        if value_2.is_null() {
+            return Results::WRONG;
+        }
 
-            let mut json_array = JsonValue::new_array();
-            let _ = json_array.push(value_2.as_u32().unwrap());
-
-            if !compute_pair(&value_1, &json_array) {
-                return false;
-            }
-        } else {
-            for i_a in 0..value_2.len() {
-                if i_a as isize > value_1.len() as isize - 1 {
-                    return false;
-                }
-
-                if !compute_pair(&value_1[i_a], &value_2[i_a]) {
-                    return false;
-                }
-            }
-
-            if value_1.len() <= value_2.len() {
-                return false;
-            }
+        let result = compute_pair(&value_1, &value_2);
+        if result != Results::CONTINUE {
+            return result;
         }
     }
 
-    true
+    Results::CONTINUE
+}
+
+fn compute_pair(pair_1: &JsonValue, pair_2: &JsonValue) -> Results {
+    if pair_1.is_number() && pair_2.is_number() {
+        return compute_number(&pair_1, &pair_2);
+    } else if pair_1.is_array() && pair_2.is_array() {
+        return compute_array(&pair_1, &pair_2);
+    } else {
+        return compute_mix(pair_1, pair_2);
+    }
 }
 
 fn main() {
-    let mut bad_order_score: u32 = 0;
+    let mut good_order_score: u32 = 0;
     let mut pairs: Vec<[JsonValue; 2]> = Vec::new();
-    let contents = fs::read_to_string("./src/sample-input.txt")
+    let contents = fs::read_to_string("./src/input.txt")
         .expect("Should have been able to read the file");
 
     contents.split("\n\n").for_each(|pair_lines| {
@@ -87,14 +111,16 @@ fn main() {
 
     for (i, [pair_1, pair_2]) in pairs.iter().enumerate() {
         let result = compute_pair(pair_1, pair_2);
+        match result {
+            Results::CORRECT => {
+                good_order_score += i as u32 + 1;
+            }
+            _ => {}
+        };
 
-        println!("Compute: {}", result);
-        if result {
-            bad_order_score += i as u32 + 1;
-            println!("i: {}", i);
-        }
+        println!("Compute: {:?}", result);
     }
 
-    println!("Bad order score: {}", bad_order_score);
+    println!("Good order score: {}", good_order_score);
     // dbg!("{}", pairs);
 }
